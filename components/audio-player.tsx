@@ -2,79 +2,139 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Volume2, VolumeX } from "lucide-react"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface AudioPlayerProps {
   src: string
-  autoPlay?: boolean
 }
 
-export function AudioPlayer({ src, autoPlay = true }: AudioPlayerProps) {
+export function AudioPlayer({ src }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
-  const [isMuted, setIsMuted] = useState(true)
-  const [isLoaded, setIsLoaded] = useState(false)
+  const [playing, setPlaying] = useState(false)
   const [hasError, setHasError] = useState(false)
+  const [needsGesture, setNeedsGesture] = useState(false)
 
   useEffect(() => {
     const audio = new Audio(src)
     audio.loop = true
-    audio.volume = 0.4
+    audio.volume = 0.5
     audioRef.current = audio
 
-    audio.addEventListener('canplaythrough', () => setIsLoaded(true))
-    audio.addEventListener('error', () => setHasError(true))
+    audio.addEventListener("error", () => setHasError(true))
 
-    if (autoPlay) {
-      audio.play().catch(() => setIsMuted(true))
-    }
+    // Attempt autoplay with sound — browsers may block it
+    audio
+      .play()
+      .then(() => {
+        setPlaying(true)
+        setNeedsGesture(false)
+      })
+      .catch(() => {
+        // Autoplay blocked — wait for any user gesture on the document
+        setNeedsGesture(true)
+
+        const unlock = () => {
+          audio
+            .play()
+            .then(() => {
+              setPlaying(true)
+              setNeedsGesture(false)
+              document.removeEventListener("click", unlock)
+              document.removeEventListener("keydown", unlock)
+              document.removeEventListener("touchstart", unlock)
+            })
+            .catch(() => {})
+        }
+
+        document.addEventListener("click", unlock, { once: true })
+        document.addEventListener("keydown", unlock, { once: true })
+        document.addEventListener("touchstart", unlock, { once: true })
+      })
 
     return () => {
       audio.pause()
-      audio.src = ''
+      audio.src = ""
     }
-  }, [src, autoPlay])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src])
 
-  const toggleMute = () => {
-    if (!audioRef.current) return
-
-    if (isMuted) {
-      audioRef.current.play().then(() => {
-        setIsMuted(false)
-      }).catch(console.error)
+  const toggle = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (playing) {
+      audio.pause()
+      setPlaying(false)
     } else {
-      audioRef.current.pause()
-      setIsMuted(true)
+      audio.play().then(() => setPlaying(true)).catch(() => {})
     }
   }
 
-  // Silently hide the player if the audio file doesn't exist (404)
   if (hasError) return null
 
   return (
-    <motion.button
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 1 }}
-      onClick={toggleMute}
-      disabled={!isLoaded}
-      className="fixed top-4 right-4 z-50 p-3 rounded-full glass hover:bg-purple-500/30 
-                 transition-all duration-300 group disabled:opacity-50"
-      aria-label={isMuted ? "Unmute music" : "Mute music"}
-    >
-      {isMuted ? (
-        <VolumeX className="w-6 h-6 text-purple-200 group-hover:text-white transition-colors" />
-      ) : (
-        <Volume2 className="w-6 h-6 text-purple-200 group-hover:text-white transition-colors" />
-      )}
-      
-      {/* Pulse animation when playing */}
-      {!isMuted && (
-        <motion.span
-          animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="absolute inset-0 rounded-full bg-purple-500/30"
-        />
-      )}
-    </motion.button>
+    <>
+      {/* Mute/unmute pill — fixed bottom-right, above everything */}
+      <motion.button
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        onClick={toggle}
+        className="fixed bottom-5 right-5 z-[9998] flex items-center gap-2 px-3 py-2 rounded-full shadow-xl focus:outline-none"
+        style={{
+          background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
+          border: "1px solid rgba(255,255,255,0.2)",
+        }}
+        aria-label={playing ? "Pause music" : "Play music"}
+      >
+        {playing ? (
+          <Volume2 className="w-4 h-4 text-white" />
+        ) : (
+          <VolumeX className="w-4 h-4 text-white/70" />
+        )}
+
+        {/* Equaliser bars when playing */}
+        <AnimatePresence>
+          {playing && (
+            <motion.span
+              initial={{ opacity: 0, width: 0 }}
+              animate={{ opacity: 1, width: "auto" }}
+              exit={{ opacity: 0, width: 0 }}
+              className="overflow-hidden flex items-end gap-[3px]"
+              style={{ height: 14 }}
+            >
+              {[0.6, 1, 0.75, 0.9, 0.5].map((h, i) => (
+                <motion.span
+                  key={i}
+                  animate={{ scaleY: [h, 1, h * 0.5, 1, h] }}
+                  transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.12 }}
+                  className="block w-[3px] rounded-full bg-white origin-bottom"
+                  style={{ height: "100%" }}
+                />
+              ))}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </motion.button>
+
+      {/* One-time "tap to play" prompt when autoplay is blocked */}
+      <AnimatePresence>
+        {needsGesture && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="fixed bottom-16 right-5 z-[9997] px-4 py-2.5 rounded-2xl shadow-xl text-white text-xs font-medium pointer-events-none"
+            style={{
+              background: "linear-gradient(135deg, rgba(124,58,237,0.9), rgba(91,33,182,0.9))",
+              backdropFilter: "blur(10px)",
+              fontFamily: "var(--font-outfit)",
+              border: "1px solid rgba(255,255,255,0.15)",
+            }}
+          >
+            🎵 Tap anywhere to start the music
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

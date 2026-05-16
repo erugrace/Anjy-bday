@@ -31,8 +31,8 @@ export default function BirthdayPage() {
       {/* Sticky header — only on main experience */}
       <Header gameComplete={gameComplete} />
 
-      {/* Audio */}
-      {!gameComplete && <AudioPlayer src="/audio/birthday-song.mp3" autoPlay />}
+      {/* Audio — mounted once, plays continuously throughout the whole experience */}
+      <AudioPlayer src="/Ebenezer_Obey_-_Ebenezer_Obey_-_Happy_Birthday.mp3" />
 
       <main className="relative min-h-screen">
         <AnimatePresence mode="wait">

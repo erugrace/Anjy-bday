@@ -40,6 +40,12 @@ const books: Book[] = [
     pdfUrl: "/_OceanofPDF.com_The_Marriage_Monitoring_Aunties_Association_-_Ola_Awonubi.pdf",
     emoji: "💜",
   },
+  {
+    title: "Fine Boys",
+    author: "Eghosa Imasuen",
+    pdfUrl: "/_OceanofPDF.com_Fine_Boys_-_Eghosa_Imasuen.pdf",
+    emoji: "👑",
+  },
 ]
 
 type GiftItem =
@@ -66,15 +72,15 @@ const BOX_COLORS: BoxColor[] = [
 ]
 
 const giftItems: GiftItem[] = [
-  { type: "empty", message: "Just pure love!", sub: "No book here, only blessings 🙏", emoji: "💜", color: BOX_COLORS[1] },
   { type: "book",  book: books[0], color: BOX_COLORS[0] },
-  { type: "empty", message: "Glitter & vibes ✨", sub: "You're the real treasure", emoji: "✨", color: BOX_COLORS[3] },
+  { type: "empty", message: "Just pure love!", sub: "No book here, only blessings 🙏", emoji: "💜", color: BOX_COLORS[1] },
   { type: "book",  book: books[1], color: BOX_COLORS[2] },
-  { type: "empty", message: "Surprise! 🎉", sub: "The gift was friendship all along", emoji: "🎉", color: BOX_COLORS[5] },
+  { type: "empty", message: "Glitter & vibes ✨", sub: "You're the real treasure", emoji: "✨", color: BOX_COLORS[3] },
   { type: "book",  book: books[2], color: BOX_COLORS[4] },
-  { type: "empty", message: "Big birthday energy!", sub: "Go bestie, it's your day 🎂", emoji: "🎂", color: BOX_COLORS[7] },
+  { type: "empty", message: "Surprise! 🎉", sub: "The gift was friendship all along", emoji: "🎉", color: BOX_COLORS[5] },
   { type: "book",  book: books[3], color: BOX_COLORS[6] },
-  { type: "empty", message: "Keep shining! ☀️", sub: "You deserve all the good things", emoji: "☀️", color: BOX_COLORS[8] },
+  { type: "empty", message: "Big birthday energy!", sub: "Go bestie, it's your birthday 🎂", emoji: "🎂", color: BOX_COLORS[7] },
+  { type: "book",  book: books[4], color: BOX_COLORS[8] },
 ]
 
 /* ─────────────────────────────────────────────
