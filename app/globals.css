@@ -1,0 +1,266 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Neutral base with purple accents */
+  --background: oklch(0.97 0.005 60);
+  --foreground: oklch(0.15 0.01 60);
+  --card: oklch(0.99 0.003 60);
+  --card-foreground: oklch(0.15 0.01 60);
+  --popover: oklch(0.99 0.003 60);
+  --popover-foreground: oklch(0.15 0.01 60);
+  --primary: oklch(0.50 0.18 285);
+  --primary-foreground: oklch(0.98 0.01 60);
+  --secondary: oklch(0.94 0.008 60);
+  --secondary-foreground: oklch(0.20 0.01 60);
+  --muted: oklch(0.92 0.006 60);
+  --muted-foreground: oklch(0.45 0.02 60);
+  --accent: oklch(0.55 0.20 285);
+  --accent-foreground: oklch(0.98 0.01 60);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.88 0.01 60);
+  --input: oklch(0.92 0.008 60);
+  --ring: oklch(0.50 0.18 285);
+  --radius: 0.625rem;
+
+  /* Custom palette */
+  --cream: oklch(0.97 0.008 75);
+  --cream-dark: oklch(0.93 0.01 70);
+  --charcoal: oklch(0.20 0.01 60);
+  --charcoal-light: oklch(0.35 0.015 60);
+  --purple-deep: oklch(0.35 0.18 285);
+  --purple-rich: oklch(0.45 0.20 285);
+  --purple-soft: oklch(0.60 0.15 290);
+  --purple-light: oklch(0.85 0.08 295);
+  --gold: oklch(0.70 0.12 85);
+  --gold-soft: oklch(0.85 0.08 85);
+}
+
+@theme inline {
+  --font-sans: 'Outfit', system-ui, sans-serif;
+  --font-serif: 'Libre Baskerville', 'Georgia', serif;
+  --font-display: 'Syne', 'Arial Black', sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-25px) rotate(3deg); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { 
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.9;
+    transform: scale(1.05);
+  }
+}
+
+/* CSS-driven blob pulse — runs on compositor, zero JS cost */
+@keyframes blob-pulse {
+  0%, 100% { opacity: 0.15; transform: scale(1) translate3d(0,0,0); }
+  50%       { opacity: 0.30; transform: scale(1.06) translate3d(0,0,0); }
+}
+
+.animate-blob {
+  animation: blob-pulse 9s ease-in-out infinite;
+  will-change: opacity, transform;
+}
+
+/* ── Horizontal marquee ── */
+@keyframes marquee-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes marquee-right {
+  0%   { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+/* flex + max-content so -50% == exactly one copy's width (all items use margin-right, no gap) */
+.marquee-left  { display: flex; width: max-content; animation: marquee-left  38s linear infinite; will-change: transform; }
+.marquee-right { display: flex; width: max-content; animation: marquee-right 42s linear infinite; will-change: transform; }
+
+/* ── Gift button bounce ── */
+@keyframes bounce-gift {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30%       { transform: translateY(-5px) scale(1.04); }
+  60%       { transform: translateY(2px)  scale(0.97); }
+}
+.animate-bounce-gift { animation: bounce-gift 2.4s ease-in-out infinite; }
+
+/* ── Gift button sparkle pulse ── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(212,175,55,0.4), 0 0 20px 6px rgba(139,92,246,0.25); }
+  50%       { box-shadow: 0 0 16px 6px rgba(212,175,55,0.65), 0 0 36px 12px rgba(139,92,246,0.4); }
+}
+.animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-5%, -10%); }
+  20% { transform: translate(-15%, 5%); }
+  30% { transform: translate(7%, -25%); }
+  40% { transform: translate(-5%, 25%); }
+  50% { transform: translate(-15%, 10%); }
+  60% { transform: translate(15%, 0%); }
+  70% { transform: translate(0%, 15%); }
+  80% { transform: translate(3%, 35%); }
+  90% { transform: translate(-10%, 10%); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(168, 85, 247, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Film grain — single global layer only, not per section */
+.grain-layer {
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  will-change: transform;
+  animation: grain 8s steps(10) infinite;
+  z-index: 9999;
+}
+
+/* Keep .grain-overlay for any legacy usage but make it a no-op */
+.grain-overlay::before {
+  content: none;
+}
+
+/* Elegant text styles */
+.text-gradient {
+  background: linear-gradient(135deg, var(--charcoal) 0%, var(--purple-rich) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-purple {
+  background: linear-gradient(135deg, var(--purple-deep) 0%, var(--purple-soft) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle glow for accents */
+.glow-purple {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.08);
+}
+
+.glow-purple-text {
+  text-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+}
+
+/* Glass card style */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.glass-dark {
+  background: rgba(30, 30, 35, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--purple-light);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--purple-soft);
+}
+
+/* Selection color */
+::selection {
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--charcoal);
+}
