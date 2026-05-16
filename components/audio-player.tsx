@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { Volume2, VolumeX } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -8,66 +8,161 @@ interface AudioPlayerProps {
   src: string
 }
 
+/**
+ * Autoplay browsers: prefer unmuted play() first (often works after prior visits / MEI),
+ * fall back to muted play + deferred unmute, then unlock on first pointerdown/keydown anywhere.
+ *
+ * IMPORTANT: Immediately setting muted=false in the same tick as muted play()
+ * Chrome/Safari often PAUSE the audio — deferred rAF chain helps; gesture always wins.
+ */
 export function AudioPlayer({ src }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const [playing, setPlaying] = useState(false)
   const [hasError, setHasError] = useState(false)
   const [needsGesture, setNeedsGesture] = useState(false)
 
+  const tryUnmuted = useCallback(async (el: HTMLAudioElement) => {
+    el.volume = 0.55
+    el.muted = false
+    await el.play()
+  }, [])
+
+  const unlockFromGesture = useCallback(() => {
+    const el = audioRef.current
+    if (!el) return
+    if (!el.paused && !el.muted) return
+
+    el.muted = false
+    el.volume = 0.55
+    void el.play().then(() => {
+      setPlaying(true)
+      setNeedsGesture(false)
+    })
+  }, [])
+
   useEffect(() => {
-    const audio = new Audio(src)
-    audio.loop = true
-    audio.volume = 0.5
-    audioRef.current = audio
+    const el = audioRef.current
+    if (!el) return
+    const media = el
 
-    audio.addEventListener("error", () => setHasError(true))
+    const onErr = () => setHasError(true)
+    const onPlay = () => setPlaying(true)
+    const onPause = () => setPlaying(false)
 
-    // Strategy: start MUTED (browsers always allow this), then immediately unmute.
-    // This gets sound playing on the very first page load without any user tap.
-    audio.muted = true
-    audio
-      .play()
-      .then(() => {
-        // Successfully started — unmute right away
-        audio.muted = false
+    media.addEventListener("error", onErr)
+    media.addEventListener("play", onPlay)
+    media.addEventListener("pause", onPause)
+
+    let gestureHandler: (() => void) | null = null
+
+    const detachGesture = () => {
+      if (!gestureHandler) return
+      document.removeEventListener("pointerdown", gestureHandler, true)
+      document.removeEventListener("keydown", gestureHandler, true)
+      document.removeEventListener("touchstart", gestureHandler, true)
+      gestureHandler = null
+    }
+
+    const attachGestureFallback = () => {
+      if (gestureHandler) return
+      gestureHandler = () => {
+        unlockFromGesture()
+        detachGesture()
+      }
+      document.addEventListener("pointerdown", gestureHandler, { capture: true, passive: true })
+      document.addEventListener("keydown", gestureHandler, { capture: true })
+      document.addEventListener("touchstart", gestureHandler, { capture: true, passive: true })
+    }
+
+    /** Try muted → play → unmute next frame ×2 (avoids immediate mute flip pause) */
+    const tryMutedThenDeferUnmute = async () => {
+      media.volume = 0.55
+      media.muted = true
+      try {
+        await media.play()
+      } catch {
+        setNeedsGesture(true)
+        attachGestureFallback()
+        return
+      }
+
+      const bumpUnmute = () => {
+        try {
+          media.muted = false
+          void media.play()
+          if (!media.paused) setPlaying(true)
+        } catch {
+          /* noop */
+        }
+      }
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          bumpUnmute()
+          if (media.paused) {
+            void media.play()
+          }
+          if (media.paused || media.muted) {
+            setTimeout(() => {
+              bumpUnmute()
+              if (media.paused) void media.play()
+              if (media.paused || media.muted) {
+                attachGestureFallback()
+                setNeedsGesture(true)
+              } else setNeedsGesture(false)
+            }, 120)
+          } else setNeedsGesture(false)
+        })
+      })
+    }
+
+    async function bootstrap() {
+      media.preload = "auto"
+      media.loop = true
+      media.volume = 0.55
+
+      try {
+        await tryUnmuted(media)
         setPlaying(true)
         setNeedsGesture(false)
-      })
-      .catch(() => {
-        // Even muted autoplay failed (very rare) — wait for first gesture
-        audio.muted = false
-        setNeedsGesture(true)
+        return
+      } catch {
+        /* fall through — try muted path */
+      }
 
-        const unlock = () => {
-          audio
-            .play()
-            .then(() => {
-              setPlaying(true)
-              setNeedsGesture(false)
-            })
-            .catch(() => {})
-        }
+      await tryMutedThenDeferUnmute()
+    }
 
-        document.addEventListener("click", unlock, { once: true })
-        document.addEventListener("keydown", unlock, { once: true })
-        document.addEventListener("touchstart", unlock, { once: true })
-      })
+    // Wait until we have enough buffered data (instant play() on empty Audio often rejects)
+    if (media.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      void bootstrap()
+    } else {
+      const onReady = () => {
+        media.removeEventListener("canplay", onReady)
+        void bootstrap()
+      }
+      media.addEventListener("canplay", onReady)
+    }
 
     return () => {
-      audio.pause()
-      audio.src = ""
+      media.removeEventListener("error", onErr)
+      media.removeEventListener("play", onPlay)
+      media.removeEventListener("pause", onPause)
+      detachGesture()
+      media.pause()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src])
+  }, [src, tryUnmuted, unlockFromGesture])
 
   const toggle = () => {
-    const audio = audioRef.current
-    if (!audio) return
-    if (playing) {
-      audio.pause()
+    const el = audioRef.current
+    if (!el) return
+    if (!el.paused) {
+      el.pause()
       setPlaying(false)
     } else {
-      audio.play().then(() => setPlaying(true)).catch(() => {})
+      el.muted = false
+      el.volume = 0.55
+      void el.play().then(() => setPlaying(true)).catch(() => {})
     }
   }
 
@@ -75,26 +170,30 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
 
   return (
     <>
-      {/* Mute/unmute pill — fixed bottom-right, above everything */}
+      <audio ref={audioRef} src={src} loop preload="auto" playsInline className="sr-only" />
+
+      {/* Mute/unmute pill */}
       <motion.button
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8 }}
-        onClick={toggle}
+        onClick={(e) => {
+          e.stopPropagation()
+          toggle()
+        }}
         className="fixed bottom-5 right-5 z-[9998] flex items-center gap-2 px-3 py-2 rounded-full shadow-xl focus:outline-none"
         style={{
           background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
           border: "1px solid rgba(255,255,255,0.2)",
         }}
         aria-label={playing ? "Pause music" : "Play music"}
+        type="button"
       >
         {playing ? (
           <Volume2 className="w-4 h-4 text-white" />
         ) : (
           <VolumeX className="w-4 h-4 text-white/70" />
         )}
-
-        {/* Equaliser bars when playing */}
         <AnimatePresence>
           {playing && (
             <motion.span
@@ -118,7 +217,6 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
         </AnimatePresence>
       </motion.button>
 
-      {/* One-time "tap to play" prompt when autoplay is blocked */}
       <AnimatePresence>
         {needsGesture && (
           <motion.div
@@ -133,7 +231,7 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
               border: "1px solid rgba(255,255,255,0.15)",
             }}
           >
-            🎵 Tap anywhere to start the music
+            🎵 Tap anywhere (or tap 19 ✨) to start the music
           </motion.div>
         )}
       </AnimatePresence>
