@@ -612,11 +612,11 @@ export function PhotoGallery() {
             </motion.h3>
             <ArrowDecoration direction="right" />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {recentPhotos.map((photo, index) => (
               <div
                 key={photo.id}
-                className={index % 5 === 1 ? "md:mt-6" : index % 5 === 2 ? "md:mt-12" : index % 5 === 3 ? "md:mt-6" : ""}
+                className={index % 3 === 1 ? "md:mt-8" : index % 3 === 2 ? "md:mt-16" : ""}
               >
                 <PhotoCard photo={photo} index={index + 4} onOpen={setLightboxPhoto} />
               </div>

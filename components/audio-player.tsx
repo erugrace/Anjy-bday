@@ -22,15 +22,20 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
 
     audio.addEventListener("error", () => setHasError(true))
 
-    // Attempt autoplay with sound — browsers may block it
+    // Strategy: start MUTED (browsers always allow this), then immediately unmute.
+    // This gets sound playing on the very first page load without any user tap.
+    audio.muted = true
     audio
       .play()
       .then(() => {
+        // Successfully started — unmute right away
+        audio.muted = false
         setPlaying(true)
         setNeedsGesture(false)
       })
       .catch(() => {
-        // Autoplay blocked — wait for any user gesture on the document
+        // Even muted autoplay failed (very rare) — wait for first gesture
+        audio.muted = false
         setNeedsGesture(true)
 
         const unlock = () => {
@@ -39,9 +44,6 @@ export function AudioPlayer({ src }: AudioPlayerProps) {
             .then(() => {
               setPlaying(true)
               setNeedsGesture(false)
-              document.removeEventListener("click", unlock)
-              document.removeEventListener("keydown", unlock)
-              document.removeEventListener("touchstart", unlock)
             })
             .catch(() => {})
         }

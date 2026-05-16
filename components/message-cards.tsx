@@ -2,8 +2,8 @@
 
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
-import { useState, useRef } from "react"
-import { Heart, Sparkles } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
+import { Heart, Sparkles, X } from "lucide-react"
 
 interface MessageCard {
   id: number
@@ -65,7 +65,7 @@ const messages: MessageCard[] = [
   {
     id: 8,
     name: "Derin",
-    avatar: "/Grace.jpg",
+    avatar: "/Derin.jpg",
     message:
       "Anjolaoluwa, ml. I'm so happy to have you in my life. You've been a sister, a mother, a friend and the best girls' girl I've ever had! I love your heart, your generosity and your intentionality towards your friends 🥹. Thank you for rooting for me, for praying for me, for loving me and always being there for me. Thank you for teaching me small Yoruba 😂. Thank you for your beautiful letters, they always do something special in my heart. I love you so much and I want you to know that I'm rooting for you so so much 🥹. God bless you, my queen ❤️",
   },
@@ -92,7 +92,6 @@ const messages: MessageCard[] = [
   },
 ]
 
-// Unique palette per card
 const PALETTES = [
   { front: ["#ede9fe", "#c4b5fd"], back: ["#5b21b6", "#7c3aed"], text: "#3b0764" },
   { front: ["#fef3c7", "#fde68a"], back: ["#92400e", "#b45309"], text: "#78350f" },
@@ -106,23 +105,161 @@ const PALETTES = [
   { front: ["#fff7ed", "#fed7aa"], back: ["#7c2d12", "#9a3412"], text: "#431407" },
 ]
 
-// Fixed 14px margin so -50% translate == exactly 5 cards → perfectly seamless loop ✓
-// Card width targets exactly 1/5 of viewport (5 × (cardW + 14) = 100vw when vw value is active)
 const CARD_MARGIN = "14px"
 const CARD_W = "clamp(150px, calc(20vw - 14px), 260px)"
-const CARD_H = "clamp(210px, calc(27vw - 14px), 290px)"
+const CARD_H = "clamp(220px, calc(28vw - 14px), 310px)"
 
-function FlipCard({ card, index }: { card: MessageCard; index: number }) {
-  const [locked, setLocked] = useState(false)   // click to lock flip
-  const [hovered, setHovered] = useState(false)  // hover preview
-  const flipped = locked || hovered
+// ── Message Modal ──────────────────────────────────────────────────────────────
+function MessageModal({
+  card,
+  pal,
+  onClose,
+}: {
+  card: MessageCard
+  pal: typeof PALETTES[0]
+  onClose: () => void
+}) {
   const [imgError, setImgError] = useState(false)
-  const pal = PALETTES[index % PALETTES.length]
+
+  // Close on Escape
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [onClose])
+
+  // Prevent body scroll while open
+  useEffect(() => {
+    document.body.style.overflow = "hidden"
+    return () => { document.body.style.overflow = "" }
+  }, [])
 
   return (
-    // margin-right (not gap) so -50% in marquee is exactly one set wide → seamless loop
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6"
+      style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+    >
+      <motion.div
+        initial={{ y: "100%", scale: 0.97 }}
+        animate={{ y: 0, scale: 1 }}
+        exit={{ y: "100%", scale: 0.97 }}
+        transition={{ type: "spring", damping: 28, stiffness: 280 }}
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+        style={{
+          background: `linear-gradient(160deg, ${pal.back[0]}, ${pal.back[1]})`,
+          maxHeight: "90dvh",
+        }}
+      >
+        {/* Drag handle */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden">
+          <div className="w-10 h-1 rounded-full bg-white/30" />
+        </div>
+
+        {/* Header — photo + name */}
+        <div className="flex items-center gap-4 px-6 pt-4 pb-5">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/30 shrink-0 shadow-lg">
+            {!imgError ? (
+              <Image
+                src={card.avatar}
+                alt={card.name}
+                fill
+                className="object-cover object-top"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div
+                className="w-full h-full flex items-center justify-center"
+                style={{ background: `linear-gradient(135deg, ${pal.front[0]}, ${pal.front[1]})` }}
+              >
+                <span className="text-2xl font-bold" style={{ color: pal.text }}>
+                  {card.name.charAt(0)}
+                </span>
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p
+              className="text-white font-bold text-lg leading-tight"
+              style={{ fontFamily: "var(--font-syne)" }}
+            >
+              {card.name}
+            </p>
+            <p
+              className="text-white/60 text-xs mt-0.5"
+              style={{ fontFamily: "var(--font-outfit)" }}
+            >
+              Birthday message 💜
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/25 transition-colors"
+          >
+            <X className="w-4 h-4 text-white" />
+          </button>
+        </div>
+
+        {/* Divider */}
+        <div className="mx-6 h-px bg-white/20 mb-5" />
+
+        {/* Message — scrollable */}
+        <div className="flex-1 overflow-y-auto px-6 pb-8">
+          <p
+            className="text-white/90 leading-relaxed text-base"
+            style={{ fontFamily: "var(--font-outfit)" }}
+          >
+            {card.message}
+          </p>
+          <div className="flex items-center gap-2 mt-6 opacity-60">
+            <Heart className="w-4 h-4 text-white fill-white" />
+            <span className="text-white text-xs" style={{ fontFamily: "var(--font-outfit)" }}>
+              With love
+            </span>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ── Flip card ─────────────────────────────────────────────────────────────────
+function FlipCard({
+  card,
+  index,
+  onOpenModal,
+}: {
+  card: MessageCard
+  index: number
+  onOpenModal: (card: MessageCard, pal: typeof PALETTES[0]) => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  const [imgError, setImgError] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+  const pal = PALETTES[index % PALETTES.length]
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768)
+    check()
+    window.addEventListener("resize", check)
+    return () => window.removeEventListener("resize", check)
+  }, [])
+
+  const handleClick = useCallback(() => {
+    // On mobile: open full modal
+    // On desktop: clicking does nothing extra — hover already flips
+    if (isMobile) onOpenModal(card, pal)
+  }, [isMobile, card, pal, onOpenModal])
+
+  const flipped = !isMobile && hovered
+
+  return (
     <div
-      onClick={() => setLocked((l) => !l)}
+      onClick={handleClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className="cursor-pointer shrink-0 select-none"
@@ -139,7 +276,7 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
         className="relative w-full h-full"
         style={{ transformStyle: "preserve-3d" }}
       >
-        {/* ── FRONT — big photo, polaroid style ── */}
+        {/* ── FRONT — full-bleed photo ── */}
         <div
           className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col shadow-xl"
           style={{
@@ -147,7 +284,6 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
             background: `linear-gradient(160deg, ${pal.front[0]}, ${pal.front[1]})`,
           }}
         >
-          {/* Full-bleed photo — takes ~78% of card height */}
           <div className="relative w-full" style={{ flex: "0 0 78%" }}>
             {!imgError ? (
               <Image
@@ -171,14 +307,10 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
                 </span>
               </div>
             )}
-
-            {/* Bottom gradient so name pops */}
             <div
               className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
               style={{ background: `linear-gradient(to top, ${pal.front[1]}cc, transparent)` }}
             />
-
-            {/* Sparkle badge — top right */}
             <div
               className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
               style={{ background: `linear-gradient(135deg, ${pal.back[0]}, ${pal.back[1]})` }}
@@ -187,14 +319,13 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
             </div>
           </div>
 
-          {/* Name + hint — bottom strip */}
           <div className="flex-1 flex flex-col items-center justify-center px-2 py-1 gap-0.5">
             <p
-              className="font-bold leading-tight text-center truncate w-full text-center"
+              className="font-bold leading-tight text-center truncate w-full"
               style={{
                 color: pal.text,
                 fontFamily: "var(--font-syne)",
-                fontSize: "clamp(11px, 1.1vw, 14px)",
+                fontSize: "clamp(12px, 1.2vw, 15px)",
               }}
             >
               {card.name}
@@ -204,15 +335,15 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
               style={{
                 color: pal.text,
                 fontFamily: "var(--font-outfit)",
-                fontSize: "clamp(9px, 0.7vw, 11px)",
+                fontSize: "clamp(9px, 0.75vw, 11px)",
               }}
             >
-              hover or tap →
+              {isMobile ? "tap to read 💜" : "hover to read →"}
             </p>
           </div>
         </div>
 
-        {/* ── BACK ── */}
+        {/* ── BACK — desktop only, message visible ── */}
         <div
           className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col p-4 shadow-lg"
           style={{
@@ -221,57 +352,52 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
             background: `linear-gradient(145deg, ${pal.back[0]}, ${pal.back[1]})`,
           }}
         >
-          {/* Top row: small avatar + name */}
+          {/* Avatar row */}
           <div className="flex items-center gap-2 mb-3 shrink-0">
             <div
-              className="w-8 h-8 rounded-full overflow-hidden border-2 border-white/30 flex items-center justify-center shrink-0"
+              className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 shrink-0 relative"
               style={{ background: `linear-gradient(135deg, ${pal.front[0]}, ${pal.front[1]})` }}
             >
               {!imgError ? (
                 <Image
                   src={card.avatar}
                   alt={card.name}
-                  width={32}
-                  height={32}
-                  className="object-cover w-full h-full"
+                  fill
+                  className="object-cover object-top"
                   onError={() => setImgError(true)}
                 />
               ) : (
-                <span className="text-xs font-bold" style={{ color: pal.text }}>
+                <span
+                  className="absolute inset-0 flex items-center justify-center text-xs font-bold"
+                  style={{ color: pal.text }}
+                >
                   {card.name.charAt(0)}
                 </span>
               )}
             </div>
             <p
-              className="text-white/90 font-semibold text-xs truncate"
+              className="text-white/90 font-semibold text-sm"
               style={{ fontFamily: "var(--font-syne)" }}
             >
               {card.name}
             </p>
           </div>
 
-          {/* Message */}
-          <div className="flex-1 overflow-hidden relative">
+          {/* Message — bigger, scrollable */}
+          <div className="flex-1 overflow-y-auto relative pr-0.5">
             <p
-              className="text-white/85 text-[11px] leading-relaxed"
-              style={{ fontFamily: "var(--font-outfit)" }}
+              className="text-white/90 leading-relaxed"
+              style={{ fontFamily: "var(--font-outfit)", fontSize: "clamp(11px, 0.9vw, 13px)" }}
             >
               {card.message}
             </p>
-            {/* Fade out at bottom */}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none"
-              style={{
-                background: `linear-gradient(to bottom, transparent, ${pal.back[1]})`,
-              }}
-            />
           </div>
 
-          {/* Heart footer */}
-          <div className="flex items-center justify-end gap-1 mt-2 shrink-0">
+          {/* Footer */}
+          <div className="flex items-center gap-1 mt-2 shrink-0">
             <Heart className="w-3 h-3 text-white/50 fill-white/50" />
             <span className="text-white/40 text-[10px]" style={{ fontFamily: "var(--font-outfit)" }}>
-              tap to lock / move away to unflip
+              move away to unflip
             </span>
           </div>
         </div>
@@ -280,16 +406,17 @@ function FlipCard({ card, index }: { card: MessageCard; index: number }) {
   )
 }
 
+// ── Marquee row ───────────────────────────────────────────────────────────────
 function MarqueeRow({
   cards,
   direction,
+  onOpenModal,
 }: {
   cards: MessageCard[]
   direction: "left" | "right"
+  onOpenModal: (card: MessageCard, pal: typeof PALETTES[0]) => void
 }) {
   const [paused, setPaused] = useState(false)
-  // Duplicate for seamless loop. Cards use marginRight (not flex gap) so
-  // total width = 2N × (cardW + margin) and -50% == exactly N cards → seamless ✓
   const doubled = [...cards, ...cards]
 
   return (
@@ -298,23 +425,40 @@ function MarqueeRow({
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={() => setPaused(true)}
-      onTouchEnd={() => setTimeout(() => setPaused(false), 1000)}
+      onTouchEnd={() => setTimeout(() => setPaused(false), 1200)}
     >
       <div
         className={direction === "left" ? "marquee-left" : "marquee-right"}
         style={{ animationPlayState: paused ? "paused" : "running" }}
       >
         {doubled.map((card, i) => (
-          <FlipCard key={`${card.id}-${i}`} card={card} index={card.id - 1} />
+          <FlipCard
+            key={`${card.id}-${i}`}
+            card={card}
+            index={card.id - 1}
+            onOpenModal={onOpenModal}
+          />
         ))}
       </div>
     </div>
   )
 }
 
+// ── Section ───────────────────────────────────────────────────────────────────
 export function MessageCards() {
-  const row1 = messages.slice(0, 6)   // Mummy, Daddy, Grandma, Grandpa, Eniola, Teniola
-  const row2 = messages.slice(6, 11)  // Eunice, Grace, Justina, Monijesu, Omotola
+  const row1 = messages.slice(0, 6)
+  const row2 = messages.slice(6, 11)
+
+  const [modal, setModal] = useState<{
+    card: MessageCard
+    pal: typeof PALETTES[0]
+  } | null>(null)
+
+  const openModal = useCallback((card: MessageCard, pal: typeof PALETTES[0]) => {
+    setModal({ card, pal })
+  }, [])
+
+  const closeModal = useCallback(() => setModal(null), [])
 
   return (
     <section
@@ -330,7 +474,6 @@ export function MessageCards() {
       />
 
       <div className="relative z-10">
-        {/* Section title */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -363,11 +506,10 @@ export function MessageCards() {
             className="text-xs mt-3 opacity-60"
             style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-outfit)" }}
           >
-            click any card to reveal the message ✨
+            tap any card to read the full message ✨
           </p>
         </motion.div>
 
-        {/* Row 1 — scrolls left */}
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           whileInView={{ opacity: 1, x: 0 }}
@@ -375,20 +517,18 @@ export function MessageCards() {
           transition={{ duration: 0.6 }}
           className="mb-4 sm:mb-5"
         >
-          <MarqueeRow cards={row1} direction="left" />
+          <MarqueeRow cards={row1} direction="left" onOpenModal={openModal} />
         </motion.div>
 
-        {/* Row 2 — scrolls right */}
         <motion.div
           initial={{ opacity: 0, x: 40 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
-          <MarqueeRow cards={row2} direction="right" />
+          <MarqueeRow cards={row2} direction="right" onOpenModal={openModal} />
         </motion.div>
 
-        {/* End decoration */}
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
@@ -400,6 +540,13 @@ export function MessageCards() {
           <span className="w-12 h-px" style={{ backgroundColor: "var(--border)" }} />
         </motion.div>
       </div>
+
+      {/* Modal — portal-like, renders inside section but fixed in viewport */}
+      <AnimatePresence>
+        {modal && (
+          <MessageModal card={modal.card} pal={modal.pal} onClose={closeModal} />
+        )}
+      </AnimatePresence>
     </section>
   )
 }
