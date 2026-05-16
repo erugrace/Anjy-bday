@@ -151,27 +151,31 @@ function WishReadingOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 flex items-end justify-center sm:items-center p-0 sm:p-6"
+      className="fixed inset-0 flex justify-center overflow-y-auto overflow-x-hidden"
       style={{
         zIndex: WISH_OVERLAY_Z,
-        backgroundColor: "rgba(0,0,0,0.78)",
+        backgroundColor: "rgba(0,0,0,0.82)",
         backdropFilter: "blur(10px)",
         WebkitBackdropFilter: "blur(10px)",
       }}
     >
+      {/* Wrapper: grows with content; page scroll lives on backdrop (single scrollbar, full message readable) */}
+      <div className="flex min-h-full w-full items-end justify-center p-0 sm:items-center sm:p-8 sm:py-10">
       <motion.div
         role="dialog"
         aria-modal="true"
         aria-labelledby="wish-modal-name"
-        initial={{ y: "105%", opacity: 0.98 }}
+        initial={{ y: "104%", opacity: 0.98 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: "105%", opacity: 0.98 }}
+        exit={{ y: "104%", opacity: 0.98 }}
         transition={{ type: "spring", damping: 31, stiffness: 340 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full sm:max-w-md rounded-t-[1.75rem] sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col min-h-0"
+        className="relative w-full sm:max-w-lg rounded-t-[1.75rem] sm:rounded-3xl shadow-2xl flex flex-col shrink-0 sm:shadow-[0_-20px_60px_-15px_rgba(0,0,0,0.35)]"
         style={{
-          background: `linear-gradient(160deg, ${pal.back[0]}, ${pal.back[1]})`,
-          maxHeight: "min(92dvh, calc(100vh - env(safe-area-inset-bottom, 0px) - 14px))",
+          background: `linear-gradient(165deg, ${pal.back[0]}, ${pal.back[1]})`,
+          marginTop: "auto",
+          marginBottom: "auto",
+          maxWidth: "min(32rem, 100%)",
         }}
       >
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
@@ -222,14 +226,14 @@ function WishReadingOverlay({
 
         <div className="mx-6 h-px bg-white/20 mb-4 shrink-0" />
 
-        <div
-          className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-6 pb-[max(1.75rem,calc(env(safe-area-inset-bottom,0px)+16px))] touch-pan-y"
-          style={{ WebkitOverflowScrolling: "touch" }}
-        >
-          <p className="text-white/90 leading-relaxed text-base pb-1" style={{ fontFamily: "var(--font-outfit)" }}>
+        <div className="px-6 pb-[max(2rem,calc(env(safe-area-inset-bottom,0px)+20px))]">
+          <p
+            className="text-white/90 leading-relaxed text-[15px] sm:text-base whitespace-pre-wrap"
+            style={{ fontFamily: "var(--font-outfit)" }}
+          >
             {card.message}
           </p>
-          <div className="flex items-center gap-2 mt-8 mb-2 opacity-60">
+          <div className="flex items-center gap-2 mt-8 opacity-60">
             <Heart className="w-4 h-4 text-white fill-white shrink-0" />
             <span className="text-white text-xs" style={{ fontFamily: "var(--font-outfit)" }}>
               With love
@@ -237,11 +241,12 @@ function WishReadingOverlay({
           </div>
         </div>
       </motion.div>
+      </div>
     </motion.div>
   )
 }
 
-// ── Flip card ─────────────────────────────────────────────────────────────────
+// ── Marquee card: grows on hover/tap, opens full message overlay (all breakpoints) ──
 function FlipCard({
   card,
   index,
@@ -251,172 +256,98 @@ function FlipCard({
   index: number
   onOpenModal: (card: MessageCard, pal: typeof PALETTES[0]) => void
 }) {
-  const [hovered, setHovered] = useState(false)
   const [imgError, setImgError] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const pal = PALETTES[index % PALETTES.length]
 
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768)
-    check()
-    window.addEventListener("resize", check)
-    return () => window.removeEventListener("resize", check)
-  }, [])
-
-  const handleClick = useCallback(() => {
-    // On mobile: open full modal
-    // On desktop: clicking does nothing extra — hover already flips
-    if (isMobile) onOpenModal(card, pal)
-  }, [isMobile, card, pal, onOpenModal])
-
-  const flipped = !isMobile && hovered
+  const open = useCallback(() => {
+    onOpenModal(card, pal)
+  }, [card, pal, onOpenModal])
 
   return (
-    <div
-      onClick={handleClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      className="cursor-pointer shrink-0 select-none"
+    <motion.div
+      onClick={open}
+      className="relative shrink-0 cursor-pointer select-none"
       style={{
         width: CARD_W,
         height: CARD_H,
-        perspective: "1000px",
         marginRight: CARD_MARGIN,
+        transformStyle: "preserve-3d",
+        willChange: "transform",
       }}
+      whileHover={{
+        scale: 1.072,
+        y: -10,
+        zIndex: 50,
+        transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] },
+      }}
+      whileTap={{ scale: 0.96, zIndex: 50, transition: { duration: 0.12 } }}
+      initial={false}
     >
-      <motion.div
-        animate={{ rotateY: flipped ? 180 : 0 }}
-        transition={{ duration: 0.55, ease: [0.23, 1, 0.32, 1] }}
-        className="relative w-full h-full"
-        style={{ transformStyle: "preserve-3d" }}
+      <div
+        className="relative h-full w-full overflow-hidden rounded-2xl shadow-xl"
+        style={{
+          background: `linear-gradient(160deg, ${pal.front[0]}, ${pal.front[1]})`,
+        }}
       >
-        {/* ── FRONT — full-bleed photo ── */}
-        <div
-          className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col shadow-xl"
-          style={{
-            backfaceVisibility: "hidden",
-            background: `linear-gradient(160deg, ${pal.front[0]}, ${pal.front[1]})`,
-          }}
-        >
-          <div className="relative w-full" style={{ flex: "0 0 78%" }}>
-            {!imgError ? (
-              <Image
-                src={card.avatar}
-                alt={card.name}
-                fill
-                sizes="(max-width: 768px) 40vw, 20vw"
-                className="object-cover object-top"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <div
-                className="absolute inset-0 flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg, ${pal.back[0]}, ${pal.back[1]})` }}
-              >
-                <span
-                  className="text-white font-extrabold"
-                  style={{ fontSize: "clamp(36px,6vw,56px)", fontFamily: "var(--font-syne)" }}
-                >
-                  {card.name.charAt(0)}
-                </span>
-              </div>
-            )}
-            <div
-              className="absolute bottom-0 left-0 right-0 h-10 pointer-events-none"
-              style={{ background: `linear-gradient(to top, ${pal.front[1]}cc, transparent)` }}
+        <div className="relative h-[78%] w-full">
+          {!imgError ? (
+            <Image
+              src={card.avatar}
+              alt={card.name}
+              fill
+              sizes="(max-width: 768px) 40vw, 20vw"
+              className="object-cover object-top"
+              onError={() => setImgError(true)}
             />
+          ) : (
             <div
-              className="absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
+              className="flex h-full w-full items-center justify-center"
               style={{ background: `linear-gradient(135deg, ${pal.back[0]}, ${pal.back[1]})` }}
             >
-              <Sparkles className="w-3.5 h-3.5 text-white" />
+              <span
+                className="font-extrabold text-white"
+                style={{ fontSize: "clamp(36px,6vw,56px)", fontFamily: "var(--font-syne)" }}
+              >
+                {card.name.charAt(0)}
+              </span>
             </div>
-          </div>
-
-          <div className="flex-1 flex flex-col items-center justify-center px-2 py-1 gap-0.5">
-            <p
-              className="font-bold leading-tight text-center truncate w-full"
-              style={{
-                color: pal.text,
-                fontFamily: "var(--font-syne)",
-                fontSize: "clamp(12px, 1.2vw, 15px)",
-              }}
-            >
-              {card.name}
-            </p>
-            <p
-              className="opacity-50 text-center"
-              style={{
-                color: pal.text,
-                fontFamily: "var(--font-outfit)",
-                fontSize: "clamp(9px, 0.75vw, 11px)",
-              }}
-            >
-              {isMobile ? "tap to read 💜" : "hover to read →"}
-            </p>
+          )}
+          <div
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-10"
+            style={{ background: `linear-gradient(to top, ${pal.front[1]}cc, transparent)` }}
+          />
+          <div
+            className="absolute top-2 right-2 flex h-7 w-7 items-center justify-center rounded-full shadow-lg"
+            style={{ background: `linear-gradient(135deg, ${pal.back[0]}, ${pal.back[1]})` }}
+          >
+            <Sparkles className="h-3.5 w-3.5 text-white" />
           </div>
         </div>
 
-        {/* ── BACK — desktop only, message visible ── */}
-        <div
-          className="absolute inset-0 rounded-2xl overflow-hidden flex flex-col p-4 shadow-lg"
-          style={{
-            backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-            background: `linear-gradient(145deg, ${pal.back[0]}, ${pal.back[1]})`,
-          }}
-        >
-          {/* Avatar row */}
-          <div className="flex items-center gap-2 mb-3 shrink-0">
-            <div
-              className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/30 shrink-0 relative"
-              style={{ background: `linear-gradient(135deg, ${pal.front[0]}, ${pal.front[1]})` }}
-            >
-              {!imgError ? (
-                <Image
-                  src={card.avatar}
-                  alt={card.name}
-                  fill
-                  className="object-cover object-top"
-                  onError={() => setImgError(true)}
-                />
-              ) : (
-                <span
-                  className="absolute inset-0 flex items-center justify-center text-xs font-bold"
-                  style={{ color: pal.text }}
-                >
-                  {card.name.charAt(0)}
-                </span>
-              )}
-            </div>
-            <p
-              className="text-white/90 font-semibold text-sm"
-              style={{ fontFamily: "var(--font-syne)" }}
-            >
-              {card.name}
-            </p>
-          </div>
-
-          {/* Message — bigger, scrollable */}
-          <div className="flex-1 overflow-y-auto relative pr-0.5">
-            <p
-              className="text-white/90 leading-relaxed"
-              style={{ fontFamily: "var(--font-outfit)", fontSize: "clamp(11px, 0.9vw, 13px)" }}
-            >
-              {card.message}
-            </p>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center gap-1 mt-2 shrink-0">
-            <Heart className="w-3 h-3 text-white/50 fill-white/50" />
-            <span className="text-white/40 text-[10px]" style={{ fontFamily: "var(--font-outfit)" }}>
-              move away to unflip
-            </span>
-          </div>
+        <div className="flex h-[22%] flex-col items-center justify-center gap-0.5 px-2 py-1">
+          <p
+            className="w-full truncate text-center font-bold leading-tight"
+            style={{
+              color: pal.text,
+              fontFamily: "var(--font-syne)",
+              fontSize: "clamp(12px, 1.2vw, 15px)",
+            }}
+          >
+            {card.name}
+          </p>
+          <p
+            className="text-center opacity-55"
+            style={{
+              color: pal.text,
+              fontFamily: "var(--font-outfit)",
+              fontSize: "clamp(9px, 0.75vw, 11px)",
+            }}
+          >
+            tap / click → full letter 💜
+          </p>
         </div>
-      </motion.div>
-    </div>
+      </div>
+    </motion.div>
   )
 }
 
