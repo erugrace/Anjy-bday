@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useState, useEffect, useCallback } from "react"
+import { createPortal } from "react-dom"
 import { Heart, Sparkles, X } from "lucide-react"
 
 interface MessageCard {
@@ -109,8 +110,10 @@ const CARD_MARGIN = "14px"
 const CARD_W = "clamp(150px, calc(20vw - 14px), 260px)"
 const CARD_H = "clamp(220px, calc(28vw - 14px), 310px)"
 
-// ── Message Modal ──────────────────────────────────────────────────────────────
-function MessageModal({
+const WISH_OVERLAY_Z = 200_000
+
+// ── Full-screen sheet (motion root for AnimatePresence) — ported to document.body ──
+function WishReadingOverlay({
   card,
   pal,
   onClose,
@@ -121,47 +124,61 @@ function MessageModal({
 }) {
   const [imgError, setImgError] = useState(false)
 
-  // Close on Escape
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
   }, [onClose])
 
-  // Prevent body scroll while open
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow
+    const prevPaddingRight = document.body.style.paddingRight
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    if (scrollbarWidth > 0) document.body.style.paddingRight = `${scrollbarWidth}px`
     document.body.style.overflow = "hidden"
-    return () => { document.body.style.overflow = "" }
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.body.style.paddingRight = prevPaddingRight
+    }
   }, [])
 
   return (
     <motion.div
+      role="presentation"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       onClick={onClose}
-      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-6"
-      style={{ backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(8px)" }}
+      className="fixed inset-0 flex items-end justify-center sm:items-center p-0 sm:p-6"
+      style={{
+        zIndex: WISH_OVERLAY_Z,
+        backgroundColor: "rgba(0,0,0,0.78)",
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
+      }}
     >
       <motion.div
-        initial={{ y: "100%", scale: 0.97 }}
-        animate={{ y: 0, scale: 1 }}
-        exit={{ y: "100%", scale: 0.97 }}
-        transition={{ type: "spring", damping: 28, stiffness: 280 }}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wish-modal-name"
+        initial={{ y: "105%", opacity: 0.98 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: "105%", opacity: 0.98 }}
+        transition={{ type: "spring", damping: 31, stiffness: 340 }}
         onClick={(e) => e.stopPropagation()}
-        className="relative w-full sm:max-w-sm rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col"
+        className="relative w-full sm:max-w-md rounded-t-[1.75rem] sm:rounded-3xl overflow-hidden shadow-2xl flex flex-col min-h-0"
         style={{
           background: `linear-gradient(160deg, ${pal.back[0]}, ${pal.back[1]})`,
-          maxHeight: "90dvh",
+          maxHeight: "min(92dvh, calc(100vh - env(safe-area-inset-bottom, 0px) - 14px))",
         }}
       >
-        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 rounded-full bg-white/30" />
+          <div className="w-10 h-1 rounded-full bg-white/30" aria-hidden />
         </div>
 
-        {/* Header — photo + name */}
-        <div className="flex items-center gap-4 px-6 pt-4 pb-5">
+        <div className="flex items-center gap-4 px-6 pt-4 pb-5 shrink-0">
           <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/30 shrink-0 shadow-lg">
             {!imgError ? (
               <Image
@@ -184,39 +201,36 @@ function MessageModal({
           </div>
           <div className="flex-1 min-w-0">
             <p
+              id="wish-modal-name"
               className="text-white font-bold text-lg leading-tight"
               style={{ fontFamily: "var(--font-syne)" }}
             >
               {card.name}
             </p>
-            <p
-              className="text-white/60 text-xs mt-0.5"
-              style={{ fontFamily: "var(--font-outfit)" }}
-            >
+            <p className="text-white/60 text-xs mt-0.5" style={{ fontFamily: "var(--font-outfit)" }}>
               Birthday message 💜
             </p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-white/15 hover:bg-white/25 transition-colors"
+            className="shrink-0 w-10 h-10 rounded-full flex items-center justify-center bg-white/15 active:bg-white/30 hover:bg-white/25 transition-colors"
           >
-            <X className="w-4 h-4 text-white" />
+            <X className="w-5 h-5 text-white" />
           </button>
         </div>
 
-        {/* Divider */}
-        <div className="mx-6 h-px bg-white/20 mb-5" />
+        <div className="mx-6 h-px bg-white/20 mb-4 shrink-0" />
 
-        {/* Message — scrollable */}
-        <div className="flex-1 overflow-y-auto px-6 pb-8">
-          <p
-            className="text-white/90 leading-relaxed text-base"
-            style={{ fontFamily: "var(--font-outfit)" }}
-          >
+        <div
+          className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-6 pb-[max(1.75rem,calc(env(safe-area-inset-bottom,0px)+16px))] touch-pan-y"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          <p className="text-white/90 leading-relaxed text-base pb-1" style={{ fontFamily: "var(--font-outfit)" }}>
             {card.message}
           </p>
-          <div className="flex items-center gap-2 mt-6 opacity-60">
-            <Heart className="w-4 h-4 text-white fill-white" />
+          <div className="flex items-center gap-2 mt-8 mb-2 opacity-60">
+            <Heart className="w-4 h-4 text-white fill-white shrink-0" />
             <span className="text-white text-xs" style={{ fontFamily: "var(--font-outfit)" }}>
               With love
             </span>
@@ -449,6 +463,9 @@ export function MessageCards() {
   const row1 = messages.slice(0, 6)
   const row2 = messages.slice(6, 11)
 
+  const [portalReady, setPortalReady] = useState(false)
+  useEffect(() => setPortalReady(true), [])
+
   const [modal, setModal] = useState<{
     card: MessageCard
     pal: typeof PALETTES[0]
@@ -461,6 +478,7 @@ export function MessageCards() {
   const closeModal = useCallback(() => setModal(null), [])
 
   return (
+    <>
     <section
       id="wishes"
       className="py-16 md:py-28 relative overflow-x-clip"
@@ -540,13 +558,22 @@ export function MessageCards() {
           <span className="w-12 h-px" style={{ backgroundColor: "var(--border)" }} />
         </motion.div>
       </div>
-
-      {/* Modal — portal-like, renders inside section but fixed in viewport */}
-      <AnimatePresence>
-        {modal && (
-          <MessageModal card={modal.card} pal={modal.pal} onClose={closeModal} />
-        )}
-      </AnimatePresence>
     </section>
+
+    {portalReady &&
+      createPortal(
+        <AnimatePresence mode="wait">
+          {modal ? (
+            <WishReadingOverlay
+              key={`wish-${modal.card.id}`}
+              card={modal.card}
+              pal={modal.pal}
+              onClose={closeModal}
+            />
+          ) : null}
+        </AnimatePresence>,
+        document.body,
+      )}
+    </>
   )
 }
