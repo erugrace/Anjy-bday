@@ -17,67 +17,78 @@ const messages: MessageCard[] = [
     id: 1,
     name: "Mummy",
     avatar: "/Mummy.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy Birthday to my sweet daughter. You are one of the greatest blessings God has given to me, and my heart is filled with gratitude for your life. As you celebrate today, I pray that God will guide your steps, protect your heart, and make all your dreams come true. May you grow in wisdom, grace, favor, and strength. May your life always reflect happiness, peace, and purpose. Always remember that no matter how old you grow, you will forever be my little girl and a special part of my heart. Enjoy your day, my love. Shine brightly and never stop believing in yourself. Happy Birthday, darling. 💜",
   },
   {
     id: 2,
-    name: "Daddy",
+    name: "Dad",
     avatar: "/Daddy.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Anjie! Anjus baby. You're such a wonderful daughter. I wish you joy, health and peace as you celebrate your last year as a teenager going into twenty. Be excellent at what is good, be innocent of evil, and the God of peace will soon crush Satan underneath your feet. 🎉",
   },
   {
     id: 3,
     name: "Grandma",
     avatar: "/Grandma.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy birthday to you my granddaughter, your days are blessed with heavenly blessings. God will crown you with divine wisdom, knowledge and understanding. You will fulfil destiny in life in Jesus mighty Name Amen. CHEERS TO YOUR NEW AGE. 🙏✨",
   },
   {
     id: 4,
     name: "Grandpa",
     avatar: "/Grandpa.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "AnjolaOluwa, I share the joy of your birthday celebrations with you. The Lord will bless your new age with the desires of your heart. He will bless you with the ability to make exploits and the power to excel in Jesus' mighty name. Happy birthday! 🎂",
   },
   {
     id: 5,
     name: "Eniola",
     avatar: "/Eniola.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy Birthday, Anjolaoluwa Faith Bimbo-Ajiboye. 🎉 I'm truly grateful to have someone like you in my life. Thank you for the laughter, support, memories, and all the little moments that make our friendship special. As you start another year, I pray you experience happiness, good health, success, peace of mind, and endless blessings. May everything you've been hoping and working for begin to fall into place for you. Keep being the amazing person you are. Enjoy your day to the fullest because you deserve all the love and celebration today. Happy Birthday once again! ❤️",
   },
   {
     id: 6,
     name: "Teniola",
     avatar: "/Teniola.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Anjieeee 🩵 I can't thank God enough for bringing you into my life. 🥹 My prayoo! Thank you for being the woman that you are. Thank you for always being intentional about your friends. 🥹🫶 As you step into a new year, I pray it is one of exponential growth and clarity. ✨ I love you Anjolaoluwa. 🩵 Keep being you. 🥹🫶",
   },
   {
     id: 7,
     name: "Eunice",
     avatar: "/Eunice.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Anjolaaaa, happy happy birthday 🥳🥳. Looking back now, I still find it heartwarming — God's intentionality knowing I need an Anjola in my life at this moment. You encourage me, challenge me and definitely validate all my crash out moments. I pray the Almighty God continues to keep you in the perfection of His will. Thank you for being such a good friend 🫂.",
   },
   {
     id: 8,
-    name: "Grace",
+    name: "Derin",
     avatar: "/Grace.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Anjolaoluwa, ml. I'm so happy to have you in my life. You've been a sister, a mother, a friend and the best girls' girl I've ever had! I love your heart, your generosity and your intentionality towards your friends 🥹. Thank you for rooting for me, for praying for me, for loving me and always being there for me. Thank you for teaching me small Yoruba 😂. Thank you for your beautiful letters, they always do something special in my heart. I love you so much and I want you to know that I'm rooting for you so so much 🥹. God bless you, my queen ❤️",
   },
   {
     id: 9,
     name: "Justina",
     avatar: "/Justina.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy Birthday to my lovely sister. ❤️🎂 Thank you for always being supportive, caring, loving, and prayerful. I truly appreciate all your help and encouragement. May the Lord bless your new age with success in your academics, favor, happiness, peace, good health, and long life and prosperity in Jesus' name. Amen. Happy Birthday once again, dear sister. I love you so much. 💕",
   },
   {
     id: 10,
     name: "Monijesu",
     avatar: "/Monijesu.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy birthdayyyy, Anjola ❤️ I'm really grateful for the gift of being your friend and having you in my corner. You're such a thoughtful and intentional person, and I truly appreciate how involved and concerned you always are about my wellbeing. Thank you for loving me loudly and unapologetically, and for never hesitating to show it. You deserve all the beautiful things this year has to offer. This is that year for you, Anjola ✨",
   },
   {
     id: 11,
     name: "Omotola",
     avatar: "/Omotola.jpg",
-    message: "Message coming soon 💜",
+    message:
+      "Happy birthdayyyyy, Anjola. I love you so much and words can't even quantify it. I hope to write a book someday on our friendship and how God guided our steps to know each other. You get me so much and I can't be more grateful for a soul sister! Till the wheels fall off, till our hairs turn grey and till our sugar babies grow old tooooo ❤️",
   },
 ]
 

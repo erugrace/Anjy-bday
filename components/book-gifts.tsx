@@ -16,11 +16,30 @@ interface Book {
 }
 
 const books: Book[] = [
-  { title: "Purple Hibiscus", author: "Chimamanda Ngozi Adichie", pdfUrl: "/pdfs/book-1.pdf", emoji: "🌺" },
-  { title: "Things Fall Apart", author: "Chinua Achebe", pdfUrl: "/pdfs/book-2.pdf", emoji: "🏺" },
-  { title: "The Lion and the Jewel", author: "Wole Soyinka", pdfUrl: "/pdfs/book-3.pdf", emoji: "👑" },
-  { title: "The Secret Lives of Baba Segi's Wives", author: "Lola Shoneyin", pdfUrl: "/pdfs/book-4.pdf", emoji: "🌙" },
-  { title: "Children of Blood and Bone", author: "Tomi Adeyemi", pdfUrl: "/pdfs/book-5.pdf", emoji: "⚡" },
+  {
+    title: "A Good Name",
+    author: "Yejide Kilanko",
+    pdfUrl: "/_OceanofPDF.com_A_good_name_-_Yejide_Kilanko.pdf",
+    emoji: "🌺",
+  },
+  {
+    title: "The Middle Daughter",
+    author: "Chika Unigwe",
+    pdfUrl: "/_OceanofPDF.com_The_Middle_Daughter_-_Chika_Unigwe.pdf",
+    emoji: "🌙",
+  },
+  {
+    title: "The Mechanics of Yenagoa",
+    author: "Michael Afenfia",
+    pdfUrl: "/_OceanofPDF.com_The_Mechanics_of_Yenagoa_-_Michael_Afenfia.pdf",
+    emoji: "⚡",
+  },
+  {
+    title: "The Marriage Monitoring Aunties Association",
+    author: "Ola Awonubi",
+    pdfUrl: "/_OceanofPDF.com_The_Marriage_Monitoring_Aunties_Association_-_Ola_Awonubi.pdf",
+    emoji: "💜",
+  },
 ]
 
 type GiftItem =
@@ -47,15 +66,15 @@ const BOX_COLORS: BoxColor[] = [
 ]
 
 const giftItems: GiftItem[] = [
+  { type: "empty", message: "Just pure love!", sub: "No book here, only blessings 🙏", emoji: "💜", color: BOX_COLORS[1] },
   { type: "book",  book: books[0], color: BOX_COLORS[0] },
-  { type: "empty", message: "Just pure love!", sub: "No book here, only my heart 💜", emoji: "💜", color: BOX_COLORS[1] },
-  { type: "book",  book: books[1], color: BOX_COLORS[2] },
   { type: "empty", message: "Glitter & vibes ✨", sub: "You're the real treasure", emoji: "✨", color: BOX_COLORS[3] },
-  { type: "book",  book: books[2], color: BOX_COLORS[4] },
+  { type: "book",  book: books[1], color: BOX_COLORS[2] },
   { type: "empty", message: "Surprise! 🎉", sub: "The gift was friendship all along", emoji: "🎉", color: BOX_COLORS[5] },
+  { type: "book",  book: books[2], color: BOX_COLORS[4] },
+  { type: "empty", message: "Big birthday energy!", sub: "Go bestie, it's your day 🎂", emoji: "🎂", color: BOX_COLORS[7] },
   { type: "book",  book: books[3], color: BOX_COLORS[6] },
-  { type: "empty", message: "Big birthday energy!", sub: "Go bestie, it's your birthday 🎂", emoji: "🎂", color: BOX_COLORS[7] },
-  { type: "book",  book: books[4], color: BOX_COLORS[8] },
+  { type: "empty", message: "Keep shining! ☀️", sub: "You deserve all the good things", emoji: "☀️", color: BOX_COLORS[8] },
 ]
 
 /* ─────────────────────────────────────────────
