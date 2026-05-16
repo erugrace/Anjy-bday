@@ -257,6 +257,8 @@ function FlipCard({
   onOpenModal: (card: MessageCard, pal: typeof PALETTES[0]) => void
 }) {
   const [imgError, setImgError] = useState(false)
+  /** Fine pointer only — marquee moving under the cursor ignores CSS :hover reliably. */
+  const [lifted, setLifted] = useState(false)
   const pal = PALETTES[index % PALETTES.length]
 
   const open = useCallback(() => {
@@ -266,7 +268,11 @@ function FlipCard({
   return (
     <motion.div
       onClick={open}
-      className="relative shrink-0 cursor-pointer select-none"
+      onPointerEnter={(e: React.PointerEvent) => {
+        if (e.pointerType !== "touch") setLifted(true)
+      }}
+      onPointerLeave={() => setLifted(false)}
+      className="relative shrink-0 cursor-pointer touch-manipulation select-none"
       style={{
         width: CARD_W,
         height: CARD_H,
@@ -274,13 +280,13 @@ function FlipCard({
         transformStyle: "preserve-3d",
         willChange: "transform",
       }}
-      whileHover={{
-        scale: 1.072,
-        y: -10,
-        zIndex: 50,
-        transition: { duration: 0.22, ease: [0.23, 1, 0.32, 1] },
+      animate={{
+        scale: lifted ? 1.09 : 1,
+        y: lifted ? -12 : 0,
+        zIndex: lifted ? 50 : 0,
       }}
-      whileTap={{ scale: 0.96, zIndex: 50, transition: { duration: 0.12 } }}
+      transition={{ type: "spring", stiffness: 420, damping: 29 }}
+      whileTap={{ scale: 0.96, transition: { duration: 0.12 } }}
       initial={false}
     >
       <div
@@ -366,7 +372,7 @@ function MarqueeRow({
 
   return (
     <div
-      className="overflow-hidden w-full"
+      className="overflow-hidden w-full py-10 md:py-14"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onTouchStart={() => setPaused(true)}
@@ -452,10 +458,12 @@ export function MessageCards() {
             Messages from the people who love you most
           </p>
           <p
-            className="text-xs mt-3 opacity-60"
+            className="text-xs mt-3 opacity-60 px-4"
             style={{ color: "var(--muted-foreground)", fontFamily: "var(--font-outfit)" }}
           >
-            tap any card to read the full message ✨
+            <span className="hidden sm:inline">Hover or click </span>
+            <span className="sm:hidden">Tap </span>
+            any card to read ✨
           </p>
         </motion.div>
 

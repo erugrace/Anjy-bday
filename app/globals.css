@@ -124,8 +124,15 @@
   100% { transform: translateX(0); }
 }
 /* flex + max-content so -50% == exactly one copy's width (all items use margin-right, no gap) */
-.marquee-left  { display: flex; width: max-content; animation: marquee-left  38s linear infinite; will-change: transform; }
-.marquee-right { display: flex; width: max-content; animation: marquee-right 42s linear infinite; will-change: transform; }
+.marquee-left,
+.marquee-right {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+}
+.marquee-left  { animation: marquee-left  38s linear infinite; }
+.marquee-right { animation: marquee-right 42s linear infinite; }
 
 /* ── Gift button bounce ── */
 @keyframes bounce-gift {

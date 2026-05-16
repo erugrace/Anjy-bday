@@ -151,11 +151,11 @@ function PhotoCard({
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ delay: index * 0.1 + 0.3 }}
-          animate={isHovered ? { scale: 1.1, y: -2 } : { scale: 1, y: 0 }}
-          className="absolute -top-1 -right-2 z-20"
+          animate={isHovered ? { scale: 1.08, y: -2 } : { scale: 1, y: 0 }}
+          className="absolute z-30 left-1/2 top-11 w-[min(92%,220px)] -translate-x-1/2 flex justify-center px-1 md:left-auto md:right-1 md:top-0 md:w-auto md:max-w-[11rem] md:translate-x-0"
         >
           <div
-            className="text-white text-[10px] px-2 py-1 rounded-full font-medium shadow-md -rotate-6"
+            className="text-white text-[10px] leading-snug px-2.5 py-1 rounded-full font-medium shadow-md md:-rotate-6 text-center [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical] overflow-hidden"
             style={{ backgroundColor: "var(--purple-rich)", fontFamily: "var(--font-outfit)" }}
           >
             {photo.tag}
@@ -526,21 +526,27 @@ export function PhotoGallery() {
 
         {/* Old photos */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="mb-16">
-          <div className="flex items-center justify-between mb-8">
-            <ArrowDecoration direction="left" />
+          <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 mb-8 w-full px-1">
+            <div className="shrink-0 scale-75 sm:scale-100 origin-left">
+              <ArrowDecoration direction="left" />
+            </div>
             <motion.h3
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-lg font-semibold flex items-center gap-3"
+              className="min-w-0 flex-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base sm:text-lg font-semibold text-center leading-tight px-2"
               style={{ color: "var(--charcoal)", fontFamily: "var(--font-syne)" }}
             >
-              <span className="w-8 h-px" style={{ backgroundColor: "var(--purple-soft)" }} />
-              The Early Years
-              <span className="text-sm" style={{ color: "var(--purple-rich)" }}>(Throwbacks)</span>
-              <span className="w-8 h-px" style={{ backgroundColor: "var(--purple-soft)" }} />
+              <span className="hidden sm:inline-block w-6 sm:w-8 h-px shrink-0" style={{ backgroundColor: "var(--purple-soft)" }} />
+              <span>The Early Years</span>
+              <span className="text-xs sm:text-sm font-normal whitespace-nowrap" style={{ color: "var(--purple-rich)", fontFamily: "var(--font-outfit)" }}>
+                (Throwbacks)
+              </span>
+              <span className="hidden sm:inline-block w-6 sm:w-8 h-px shrink-0" style={{ backgroundColor: "var(--purple-soft)" }} />
             </motion.h3>
-            <ArrowDecoration direction="right" />
+            <div className="shrink-0 scale-75 sm:scale-100 origin-right">
+              <ArrowDecoration direction="right" />
+            </div>
           </div>
           {/* 2 cols on mobile, 4 cols on desktop — all 4 throwbacks in one clean row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto">
@@ -596,21 +602,27 @@ export function PhotoGallery() {
 
         {/* Recent photos */}
         <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
-          <div className="flex items-center justify-between mb-8">
-            <ArrowDecoration direction="left" />
+          <div className="flex flex-row items-center justify-between gap-3 sm:gap-4 mb-8 w-full px-1">
+            <div className="shrink-0 scale-75 sm:scale-100 origin-left">
+              <ArrowDecoration direction="left" />
+            </div>
             <motion.h3
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-lg font-semibold flex items-center gap-3"
+              className="min-w-0 flex-1 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-base sm:text-lg font-semibold text-center leading-tight px-2"
               style={{ color: "var(--charcoal)", fontFamily: "var(--font-syne)" }}
             >
-              <span className="w-8 h-px" style={{ backgroundColor: "var(--gold)" }} />
-              Recent Memories
-              <span className="text-sm" style={{ color: "var(--purple-rich)" }}>(Slay era)</span>
-              <span className="w-8 h-px" style={{ backgroundColor: "var(--gold)" }} />
+              <span className="hidden sm:inline-block w-6 sm:w-8 h-px shrink-0" style={{ backgroundColor: "var(--gold)" }} />
+              <span>Recent Memories</span>
+              <span className="text-xs sm:text-sm font-normal whitespace-nowrap" style={{ color: "var(--purple-rich)", fontFamily: "var(--font-outfit)" }}>
+                (Slay era)
+              </span>
+              <span className="hidden sm:inline-block w-6 sm:w-8 h-px shrink-0" style={{ backgroundColor: "var(--gold)" }} />
             </motion.h3>
-            <ArrowDecoration direction="right" />
+            <div className="shrink-0 scale-75 sm:scale-100 origin-right">
+              <ArrowDecoration direction="right" />
+            </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {recentPhotos.map((photo, index) => (
