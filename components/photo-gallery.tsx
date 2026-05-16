@@ -22,21 +22,21 @@ const oldPhotos: Photo[] = [
 ]
 
 const recentPhotos: Photo[] = [
-  { id: 5,  src: "/recent-1.jpg",  alt: "Anjola",  rotation: 2,  tag: "Queen things 👑" },
-  { id: 6,  src: "/recent-2.jpg",  alt: "Anjola",  rotation: -4, tag: "Main character" },
-  { id: 7,  src: "/recent-3.jpg",  alt: "Anjola",  rotation: 3,  tag: "Slaying always 💅" },
-  { id: 8,  src: "/recent-4.jpg",  alt: "Anjola",  rotation: -2, tag: "Living life" },
-  { id: 9,  src: "/recent-5.jpg",  alt: "Anjola",  rotation: 5,  tag: "Beautiful soul 🌸" },
-  { id: 10, src: "/recent-6.jpg",  alt: "Anjola",  rotation: -3, tag: "That smile ☀️" },
-  { id: 11, src: "/recent-7.jpg",  alt: "Anjola",  rotation: 2,  tag: "Glowing ✨" },
-  { id: 12, src: "/recent-8.jpg",  alt: "Anjola",  rotation: -1, tag: "Pure joy" },
-  { id: 13, src: "/recent-9.jpg",  alt: "Anjola",  rotation: 4,  tag: "She's that girl 💜" },
-  { id: 14, src: "/recent-10.jpg", alt: "Anjola",  rotation: -3, tag: "Iconic" },
-  { id: 15, src: "/recent-11.jpg", alt: "Anjola",  rotation: 2,  tag: "Soft life era 🌷" },
-  { id: 16, src: "/recent-12.jpg", alt: "Anjola",  rotation: -2, tag: "Radiant" },
-  { id: 17, src: "/recent-13.jpg", alt: "Anjola",  rotation: 3,  tag: "Birthday glow 🎂" },
-  { id: 18, src: "/recent-14.jpg", alt: "Anjola",  rotation: -4, tag: "Forever her 💫" },
-  { id: 19, src: "/recent-15.jpg", alt: "Anjola",  rotation: 1,  tag: "The one 👸🏾" },
+  { id: 5,  src: "/recent-1.jpg",  alt: "Anjola",             rotation: 2,  tag: "Queen things 👑" },
+  { id: 6,  src: "/recent-2.jpg",  alt: "Anjola & friends",   rotation: -4, tag: "The girls 🫂" },
+  { id: 7,  src: "/recent-3.jpg",  alt: "Anjola",             rotation: 3,  tag: "Slaying always 💅" },
+  { id: 8,  src: "/recent-4.jpg",  alt: "Anjola & friends",   rotation: -2, tag: "Squad goals 👯‍♀️" },
+  { id: 9,  src: "/recent-5.jpg",  alt: "Anjola",             rotation: 5,  tag: "Beautiful soul 🌸" },
+  { id: 10, src: "/recent-6.jpg",  alt: "Anjola",             rotation: -3, tag: "That smile ☀️" },
+  { id: 11, src: "/recent-7.jpg",  alt: "Anjola & friends",   rotation: 2,  tag: "Good times 💜" },
+  { id: 12, src: "/recent-8.jpg",  alt: "Anjola",             rotation: -1, tag: "Pure joy" },
+  { id: 13, src: "/recent-9.jpg",  alt: "Anjola & friends",   rotation: 4,  tag: "Memories made 🤍" },
+  { id: 14, src: "/recent-10.jpg", alt: "Anjola",             rotation: -3, tag: "Iconic" },
+  { id: 15, src: "/recent-11.jpg", alt: "Anjola",             rotation: 2,  tag: "Soft life era 🌷" },
+  { id: 16, src: "/recent-12.jpg", alt: "Anjola & friends",   rotation: -2, tag: "Main characters 🎬" },
+  { id: 17, src: "/recent-13.jpg", alt: "Anjola",             rotation: 3,  tag: "Birthday glow 🎂" },
+  { id: 18, src: "/recent-14.jpg", alt: "Anjola",             rotation: -4, tag: "Forever her 💫" },
+  { id: 19, src: "/recent-15.jpg", alt: "Anjola & the squad", rotation: 1,  tag: "The whole gang 🫶" },
 ]
 
 const allPhotos = [...oldPhotos, ...recentPhotos]

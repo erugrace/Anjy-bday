@@ -212,14 +212,10 @@ function computeState(): State {
     const diff = targetUTC - nowUTC
     if (diff <= 0) return { phase: "today", timeLeft: null }
 
-    const todayMidnight  = Date.UTC(watYear, watMonth, watDay) - WAT_OFFSET_MS
-    const targetMidnight = Date.UTC(2027, BIRTHDAY_MONTH, BIRTHDAY_DAY) - WAT_OFFSET_MS
-    const calDays = Math.round((targetMidnight - todayMidnight) / (1000 * 60 * 60 * 24))
-
     return {
       phase: "after",
       timeLeft: {
-        days:    calDays,
+        days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
         hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
         minutes: Math.floor((diff / 1000 / 60) % 60),
         seconds: Math.floor((diff / 1000) % 60),
@@ -232,14 +228,10 @@ function computeState(): State {
   const diff = targetUTC - nowUTC
   if (diff <= 0) return { phase: "today", timeLeft: null }
 
-  const todayMidnight  = Date.UTC(watYear, watMonth, watDay) - WAT_OFFSET_MS
-  const targetMidnight = Date.UTC(2026, BIRTHDAY_MONTH, BIRTHDAY_DAY) - WAT_OFFSET_MS
-  const calDays = Math.round((targetMidnight - todayMidnight) / (1000 * 60 * 60 * 24))
-
   return {
     phase: "before",
     timeLeft: {
-      days:    calDays,
+      days:    Math.floor(diff / (1000 * 60 * 60 * 24)),
       hours:   Math.floor((diff / (1000 * 60 * 60)) % 24),
       minutes: Math.floor((diff / 1000 / 60) % 60),
       seconds: Math.floor((diff / 1000) % 60),

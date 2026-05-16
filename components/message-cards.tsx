@@ -65,7 +65,7 @@ const messages: MessageCard[] = [
   {
     id: 8,
     name: "Derin",
-    avatar: "/Derin.jpg",
+    avatar: "/derin.jpg",
     message:
       "Anjolaoluwa, ml. I'm so happy to have you in my life. You've been a sister, a mother, a friend and the best girls' girl I've ever had! I love your heart, your generosity and your intentionality towards your friends 🥹. Thank you for rooting for me, for praying for me, for loving me and always being there for me. Thank you for teaching me small Yoruba 😂. Thank you for your beautiful letters, they always do something special in my heart. I love you so much and I want you to know that I'm rooting for you so so much 🥹. God bless you, my queen ❤️",
   },

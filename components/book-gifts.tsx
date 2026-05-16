@@ -528,7 +528,9 @@ function GiftBox({ item, index, onReveal }: { item: GiftItem; index: number; onR
                 </div>
                 <motion.a
                   href={item.book.pdfUrl}
-                  download
+                  download={`${item.book.title} - ${item.book.author}.pdf`}
+                  target="_blank"
+                  rel="noreferrer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={(e) => e.stopPropagation()}
